@@ -52,27 +52,27 @@ vagrant-exec() {
 }
 
 edxapp() {
-  # Doc: Execute command as the `edxapp` user e.g `$ edxapp ls`
+  # Doc: `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
   VAGRANT_SUDO_USER='edxapp' vagrant-exec "$@"
 }
 
 
-# Doc: Executes a paver command as the `edxapp` user e.g `$ paver --help`
+# Doc: `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
 alias paver='edxapp paver'
 
-# Doc: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
+# Doc: `manage.py`: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
 alias manage.py='edxapp python manage.py'
 
-# Doc: Executes pylint
+# Doc: `pylint`: Executes pylint
 alias pylint='edxapp pylint'
 
-# Doc: Tests a single bokchoy test case (requires the --serveronly to be running)
+# Doc: `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
 alias test_bokchoy_one='time paver test_bokchoy --testsonly --fasttest -t'
 
-# Doc: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
+# Doc: `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
 alias test_system_one='time paver test_system --disable-migrations --nologcapture --fasttest -t'
 
-# Doc: Like `test_system_one`, with coverage report, and usually slower.
+# Doc: `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
 test_cov_system_one() {
   OEPN=`which xdg-open open | head -n 1`  # Mac and Linux support
   test_system_one "$@" && paver coverage && $OPEN reports/diff_coverage_combined.html
