@@ -7,6 +7,7 @@ The aliases are highly opinionated. If you don't like
 something you're welcome to submit pull requests and/or fork it!
 
 ## Aliases
+- `openedx` goes to the directory `~/work/openedx/edx-platform`
 - `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
 - `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
 - `manage.py`: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
@@ -14,6 +15,7 @@ something you're welcome to submit pull requests and/or fork it!
 - `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
 - `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
 - `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
+
 
 **Note:** Auto documentation generated from the code using:
 ```
@@ -50,7 +52,9 @@ $ sudo vi /etc/passwd   # Change `/bin/false` to `/bin/bash` ONLY for `edxapp`
  - [ ] Exiting long running commands like `$ paver lms` doesn't work, so
        it keeps running in the background.
 
-# Credit
-The original repo was made while working at
-[**@Edraak**](https://github.com/Edraak). It has been continued while
-working at  [**@appsembler**](https://github.com/appsembler).
+# Author
+Omar Al-Ithawi (<i@omardo.com>)
+
+## Credit
+ - The original repo was made while working at [**@Edraak**](https://github.com/Edraak).
+ - It has been continued while working at  [**@appsembler**](https://github.com/appsembler).

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Doc: `openedx` goes to the directory `~/work/openedx/edx-platform`
 alias openedx='cd ~/work/openedx/edx-platform && git status'
 
 quote () {
@@ -13,8 +14,9 @@ ensure-edxapp() {
   DIR="$PWD"
 
   if [[ "$DIR" != *"platform"*  ]]; then
-    echo "edX platform or marketing directory could not be detected" 1>&2
+    echo "edX platform directory could not be detected" 1>&2
     echo "Please go to the correct directory" 1>&2
+    echo "  e.g. 'cd ~/work/openedx/edx-platform'" 1>&2
     return 1
   fi
 }
