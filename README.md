@@ -33,3 +33,9 @@ $ sudo chown edxapp:edxapp /edx/app/edxapp/.ssh/authorized_keys
 $ sudo chmod 0600 /edx/app/edxapp/.ssh/authorized_keys
 $ sudo vi /etc/passwd   # Change `/bin/false` to `/bin/bash` ONLY for `edxapp`
 ```
+
+
+# Credit
+The original repo was made while working at
+[**@Edraak**](https://github.com/Edraak). It has been continued while
+working at  [**@appsembler**](https://github.com/appsembler).
