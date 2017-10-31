@@ -1,0 +1,79 @@
+#!/bin/bash
+alias openedx='cd ~/work/openedx/edx-platform && git status'
+
+quote () {
+    # Doc (Internal): Quotes a bash argument.
+    # Source: http://askubuntu.com/a/354923/110778
+    local quoted=${1//\'/\'\\\'\'};
+    printf "'%s'" "$quoted"
+}
+
+ensure-edxapp() {
+  # Doc (Internal): Ensures that we're running inside an edX platform tree.
+  DIR="$PWD"
+
+  if [[ "$DIR" != *"platform"*  ]]; then
+    echo "edX platform or marketing directory could not be detected" 1>&2
+    echo "Please go to the correct directory" 1>&2
+    return 1
+  fi
+}
+
+vagrant-ssh() {
+  # Doc (Internal): A bit faster and lower-level alternative to the `$ vagrant ssh`
+  if ! ensure-edxapp; then
+    return 1
+  fi
+
+  CONFIG_FILE=`mktemp`
+
+  vagrant ssh-config > $CONFIG_FILE
+
+  ssh -F $CONFIG_FILE default $@
+
+  rm $CONFIG_FILE
+}
+
+vagrant-exec() {
+  # Doc (Internal): Sets the environment and executes a command inside vagrant.
+  if ! ensure-edxapp; then
+    return 1
+  fi
+
+  NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
+  VAGRANT_SUDO_USER=${VAGRANT_SUDO_USER:-'vagrant'}
+  PARAMS=$@
+
+  if [[ -n "$PARAMS" ]]; then
+    vagrant-ssh -o User=$VAGRANT_SUDO_USER -- NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS
+  else
+    vagrant-ssh -o User=$VAGRANT_SUDO_USER
+  fi
+}
+
+edxapp() {
+  # Doc: Execute command as the `edxapp` user e.g `$ edxapp ls`
+  VAGRANT_SUDO_USER='edxapp' vagrant-exec "$@"
+}
+
+
+# Doc: Executes a paver command as the `edxapp` user e.g `$ paver --help`
+alias paver='edxapp paver'
+
+# Doc: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
+alias manage.py='edxapp python manage.py'
+
+# Doc: Executes pylint
+alias pylint='edxapp pylint'
+
+# Doc: Tests a single bokchoy test case (requires the --serveronly to be running)
+alias test_bokchoy_one='time paver test_bokchoy --testsonly --fasttest -t'
+
+# Doc: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
+alias test_system_one='time paver test_system --disable-migrations --nologcapture --fasttest -t'
+
+# Doc: Like `test_system_one`, with coverage report, and usually slower.
+test_cov_system_one() {
+  OEPN=`which xdg-open open | head -n 1`  # Mac and Linux support
+  test_system_one "$@" && paver coverage && $OPEN reports/diff_coverage_combined.html
+}
