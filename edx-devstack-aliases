@@ -9,7 +9,7 @@ quote () {
     printf "'%s'" "$quoted"
 }
 
-ensure-vagrant() {
+ensure_vagrant() {
   # Doc (Internal): Ensures that we're running inside an edX platform tree.
   bash -e <<SCRIPT
   for d in `pwd | tr '/' ' '`; do
@@ -30,9 +30,9 @@ SCRIPT
   fi
 }
 
-vagrant-ssh() {
+vagrant_ssh() {
   # Doc (Internal): A bit faster and lower-level alternative to the `$ vagrant ssh`
-  if ! ensure-vagrant; then
+  if ! ensure_vagrant; then
     return 1
   fi
 
@@ -45,9 +45,9 @@ vagrant-ssh() {
   rm $CONFIG_FILE
 }
 
-vagrant-exec() {
+vagrant_exec() {
   # Doc (Internal): Sets the environment and executes a command inside vagrant.
-  if ! ensure-vagrant; then
+  if ! ensure_vagrant; then
     return 1
   fi
 
@@ -56,19 +56,19 @@ vagrant-exec() {
   PARAMS=$@
 
   if [[ -n "$PARAMS" ]]; then
-    vagrant-ssh -o User=$VAGRANT_SUDO_USER -- NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS
+    vagrant_ssh -o User=$VAGRANT_SUDO_USER -- NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS
   else
-    vagrant-ssh -o User=$VAGRANT_SUDO_USER
+    vagrant_ssh -o User=$VAGRANT_SUDO_USER
   fi
 }
 
 edxapp() {
   # Doc: `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
-  VAGRANT_SUDO_USER='edxapp' vagrant-exec "$@"
+  VAGRANT_SUDO_USER='edxapp' vagrant_exec "$@"
 }
 
-vagrant-edxapp-init-ssh() {
-  # Doc: `vagrant-edxapp-init-ssh`: Allow direct SSH via the edxapp user
+vagrant_init_ssh() {
+  # Doc: `vagrant_init_ssh`: Allow direct SSH via the edxapp user
   vagrant ssh -- bash -c "'sudo cp -r ~/.ssh /edx/app/edxapp/ && sudo chown edxapp:edxapp -R /edx/app/edxapp/.ssh'"
   vagrant ssh -- bash -c "'sudo sed -i s=edxapp:/bin/false=edxapp:/bin/bash= -- /etc/passwd'"
 }
