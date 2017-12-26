@@ -9,7 +9,7 @@ quote () {
     printf "'%s'" "$quoted"
 }
 
-ensure-edxapp() {
+ensure-vagrant() {
   # Doc (Internal): Ensures that we're running inside an edX platform tree.
   bash -e <<SCRIPT
   for d in `pwd | tr '/' ' '`; do
@@ -32,7 +32,7 @@ SCRIPT
 
 vagrant-ssh() {
   # Doc (Internal): A bit faster and lower-level alternative to the `$ vagrant ssh`
-  if ! ensure-edxapp; then
+  if ! ensure-vagrant; then
     return 1
   fi
 
@@ -47,7 +47,7 @@ vagrant-ssh() {
 
 vagrant-exec() {
   # Doc (Internal): Sets the environment and executes a command inside vagrant.
-  if ! ensure-edxapp; then
+  if ! ensure-vagrant; then
     return 1
   fi
 
