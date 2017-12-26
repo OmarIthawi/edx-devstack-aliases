@@ -86,7 +86,7 @@ alias pylint='edxapp pylint'
 alias test_bokchoy_one='time paver test_bokchoy --testsonly --fasttest -t'
 
 # Doc: `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
-alias test_system_one='time paver test_system --disable-migrations --nologcapture --fasttest -t'
+alias test_system_one='time paver test_system --disable-migrations --fasttest -t'
 
 # Doc: `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
 test_cov_system_one() {
