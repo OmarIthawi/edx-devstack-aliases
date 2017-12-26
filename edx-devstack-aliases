@@ -67,6 +67,11 @@ edxapp() {
   VAGRANT_SUDO_USER='edxapp' vagrant-exec "$@"
 }
 
+vagrant-edxapp-init-ssh() {
+  # Doc: `vagrant-edxapp-init-ssh`: Allow direct SSH via the edxapp user
+  vagrant ssh -- bash -c "'sudo cp -r ~/.ssh /edx/app/edxapp/ && sudo chown edxapp:edxapp -R /edx/app/edxapp/.ssh'"
+  vagrant ssh -- bash -c "'sudo sed -i s=edxapp:/bin/false=edxapp:/bin/bash= -- /etc/passwd'"
+}
 
 # Doc: `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
 alias paver='edxapp paver'
