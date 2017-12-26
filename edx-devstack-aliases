@@ -11,13 +11,22 @@ quote () {
 
 ensure-edxapp() {
   # Doc (Internal): Ensures that we're running inside an edX platform tree.
-  DIR="$PWD"
+  bash -e <<SCRIPT
+  for d in `pwd | tr '/' ' '`; do
+    if [ -f Vagrantfile ]; then
+      exit 0
+    fi
 
-  if [[ "$DIR" != *"platform"*  ]]; then
-    echo "edX platform directory could not be detected" 1>&2
-    echo "Please go to the correct directory" 1>&2
-    echo "  e.g. 'cd ~/work/openedx/edx-platform'" 1>&2
-    return 1
+    cd ..
+  done
+  exit 1
+SCRIPT
+
+  if [ $? -ne 0 ]; then
+      echo "edX platform directory could not be detected" 1>&2
+      echo "Please go to the correct directory" 1>&2
+      echo "  e.g. 'cd ~/work/openedx/edx-platform'" 1>&2
+      return 1
   fi
 }
 
