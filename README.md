@@ -6,9 +6,10 @@ and paver commands quickly without having to SSH into my devstack.
 The aliases are highly opinionated. If you don't like
 something you're welcome to submit pull requests and/or fork it!
 
-## Aliases
+## Commands
 - `openedx` goes to the directory `~/work/openedx/edx-platform`
 - `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
+- `vagrant_init_ssh`: Allow direct SSH via the edxapp user
 - `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
 - `manage.py`: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
 - `pylint`: Executes pylint
@@ -40,10 +41,7 @@ This repo requires allowing SSH as `edxapp`. To enable that
 SSH into vagrant and run the commands below.
 
 ```
-$ sudo cp /home/vagrant/.ssh/authorized_keys /edx/app/edxapp/.ssh/authorized_keys
-$ sudo chown edxapp:edxapp /edx/app/edxapp/.ssh/authorized_keys
-$ sudo chmod 0600 /edx/app/edxapp/.ssh/authorized_keys
-$ sudo vi /etc/passwd   # Change `/bin/false` to `/bin/bash` ONLY for `edxapp`
+$ vagrant_init_ssh
 ```
 
 # Known Limitations
