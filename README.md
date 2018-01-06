@@ -14,7 +14,7 @@ something you're welcome to submit pull requests and/or fork it!
 - `manage.py`: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
 - `pylint`: Executes pylint
 - `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
-- `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
+- `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
 - `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
 
 
