@@ -62,9 +62,25 @@ vagrant_exec() {
   fi
 }
 
+docker_edxapp_exec() {
+    # Doc (Internal): Sets the environment and executes a command inside an edxapp devstack.
+    NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
+    PARAMS="$@"
+
+    if [[ -n "$PARAMS" ]]; then
+        docker exec -it edx.devstack.lms bash -c ". /edx/app/edxapp/nodeenvs/edxapp/bin/activate; . /edx/app/edxapp/venvs/edxapp/bin/activate; cd /edx/app/edxapp/edx-platform; NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
+    else
+        echo 'Missing params'
+    fi
+}
+
 edxapp() {
   # Doc: `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
-  VAGRANT_SUDO_USER='edxapp' vagrant_exec "$@"
+  if ensure_vagrant 2>/dev/null; then
+    VAGRANT_SUDO_USER='edxapp' vagrant_exec "$@"
+  else
+    docker_edxapp_exec "$@"
+  fi
 }
 
 vagrant_init_ssh() {
@@ -85,16 +101,11 @@ alias pylint='edxapp pylint'
 # Doc: `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
 alias test_bokchoy_one='paver test_bokchoy --testsonly --fasttest -t'
 
-# Doc (Internal): Base functionality for `test_system_one` and `test_cov_system_one`.
-alias _test_system_one='paver test_system --disable-migrations --fasttest -t'
-
-test_system_one() {
-    # Doc: `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
-    _test_system_one "$@" 2>&1 | less -r
-}
+# Doc: `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one lms/djangoapps/appsembler_api/tests/test_views
+alias test_system_one='paver test_system --disable-migrations --fasttest -t'
 
 # Doc: `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
 test_cov_system_one() {
   OEPN=`which xdg-open open | head -n 1`  # Mac and Linux support
-  _test_system_one "$@" && paver coverage && $OPEN reports/diff_coverage_combined.html
+  test_system_one "$@" && paver coverage && $OPEN reports/diff_coverage_combined.html
 }
