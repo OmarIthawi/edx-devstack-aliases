@@ -85,8 +85,17 @@ edxapp() {
 
 vagrant_init_ssh() {
   # Doc: `vagrant_init_ssh`: Allow direct SSH via the edxapp user
-  vagrant ssh -- bash -c "'sudo cp -r ~/.ssh /edx/app/edxapp/ && sudo chown edxapp:edxapp -R /edx/app/edxapp/.ssh'"
   vagrant ssh -- bash -c "'sudo sed -i s=edxapp:/bin/false=edxapp:/bin/bash= -- /etc/passwd'"
+
+  vagrant ssh -- bash -c "'sudo mkdir -p /edx/app/edxapp/.ssh'"
+  vagrant ssh -- bash -c "'sudo cat /home/vagrant/.ssh/authorized_keys | sudo tee /edx/app/edxapp/.ssh/authorized_keys'"
+  vagrant ssh -- bash -c "'sudo chown edxapp:edxapp -R /edx/app/edxapp/.ssh'"
+
+  vagrant ssh -- bash -c "'sudo mkdir -p /edx/src/edxapp-envs/'"
+  vagrant ssh -- bash -c "'test -f /edx/src/edxapp-envs/lms.env.json || sudo mv /edx/app/edxapp/{lms,cms}.{env,auth}.json /edx/src/edxapp-envs/' 2>/dev/null"
+  vagrant ssh -- bash -c "'test -f /edx/src/edxapp-envs/lms.env.json && sudo ln -s /edx/src/edxapp-envs/{lms,cms}.{env,auth}.json /edx/app/edxapp/'"
+  vagrant ssh -- bash -c "'sudo chown edxapp:edxapp -R /edx/src/edxapp-envs 2>/dev/null'"
+  vagrant ssh -- bash -c "'sudo chown edxapp:edxapp /edx/src/edxapp-envs/{lms,cms}.{env,auth}.json'"
 }
 
 # Doc: `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
