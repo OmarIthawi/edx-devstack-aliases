@@ -99,23 +99,14 @@ vagrant_init_ssh() {
   vagrant ssh -- bash -c "'sudo chown edxapp:edxapp /edx/src/edxapp-envs/{lms,cms}.{env,auth}.json'"
 }
 
-# Doc: `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
-alias paver='edxapp paver'
-
-# Doc: `manage.py`: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
-alias manage.py='edxapp python manage.py'
-
-# Doc: `pylint`: Executes pylint
-alias pylint='edxapp pylint'
-
 # Doc: `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
-alias test_bokchoy_one='paver test_bokchoy --testsonly --fasttest -t'
+alias test_bokchoy_one='edxapp paver test_bokchoy --testsonly --fasttest -t'
 
 # Doc: `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one lms/djangoapps/appsembler_api/tests/test_views.py
-alias test_system_one='paver test_system --disable-migrations --fasttest -t'
+alias test_system_one='edxapp paver test_system --disable-migrations --fasttest -t'
 
 # Doc: `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
 test_cov_system_one() {
   OEPN=`which xdg-open open | head -n 1`  # Mac and Linux support
-  test_system_one "$@" && paver coverage && $OPEN reports/diff_coverage_combined.html
+  test_system_one "$@" && edxapp paver coverage && $OPEN reports/diff_coverage_combined.html
 }
