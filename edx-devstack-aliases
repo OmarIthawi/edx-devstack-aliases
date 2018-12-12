@@ -9,21 +9,34 @@ quote () {
     printf "'%s'" "$quoted"
 }
 
-ensure_vagrant() {
-  # Doc (Internal): Ensures that we're running inside an edX platform tree.
-  bash -e <<SCRIPT
-  for d in `pwd | tr '/' ' '`; do
-    if [ -f Vagrantfile ]; then
-      exit 0
-    fi
-
-    cd ..
+find_up() {
+  # Doc (Internal): Finds file in parent directories.
+  # Source: https://unix.stackexchange.com/a/22215
+  local path=$(pwd)
+  while [[ "$path" != "" && ! -e "$path/$1" ]]; do
+    path=${path%/*}
   done
-  exit 1
-SCRIPT
+  echo "$path"
+}
 
-  if [ $? -ne 0 ]; then
+ensure_vagrant() {
+  # Doc (Internal): Ensures that we're running inside a Vagrant-based edX platform tree.
+  local VAGRANT_FILE_PATH=$(find_up Vagrantfile)
+
+  if [ -z "$VAGRANT_FILE_PATH" ]; then
       echo "edX platform directory could not be detected" 1>&2
+      echo "Please go to the correct directory" 1>&2
+      echo "  e.g. 'cd ~/work/openedx/edx-platform'" 1>&2
+      return 1
+  fi
+}
+
+ensure_docker() {
+  # Doc (Internal): Ensures that we're running inside a docker devstack tree.
+  local DEVSTACK_PATH=$(find_up devstack)
+
+  if [ -z "$DEVSTACK_PATH" ]; then
+      echo "Docker devstack directory could not be detected" 1>&2
       echo "Please go to the correct directory" 1>&2
       echo "  e.g. 'cd ~/work/openedx/edx-platform'" 1>&2
       return 1
@@ -36,7 +49,7 @@ vagrant_ssh() {
     return 1
   fi
 
-  CONFIG_FILE=`mktemp`
+  local CONFIG_FILE=`mktemp`
 
   vagrant ssh-config > $CONFIG_FILE
 
@@ -51,28 +64,43 @@ vagrant_exec() {
     return 1
   fi
 
-  NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
-  PYTHONWARNINGS=${PYTHONWARNINGS:-default}
-  VAGRANT_SUDO_USER=${VAGRANT_SUDO_USER:-'vagrant'}
-  PARAMS=$@
+  local NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
+  local PYTHONWARNINGS=${PYTHONWARNINGS:-default}
+  local VAGRANT_SUDO_USER=${VAGRANT_SUDO_USER:-'vagrant'}
+  local PARAMS=$@
 
   if [[ -n "$PARAMS" ]]; then
-    vagrant_ssh -o User=$VAGRANT_SUDO_USER -- PYTHONWARNINGS=$PYTHONWARNINGS NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS
+    vagrant_ssh -o User=$VAGRANT_SUDO_USER -- PYTHONUNBUFFERED=1 PYTHONWARNINGS=$PYTHONWARNINGS NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS
   else
     vagrant_ssh -o User=$VAGRANT_SUDO_USER
   fi
 }
 
-docker_edxapp_exec() {
-    # Doc (Internal): Sets the environment and executes a command inside an edxapp devstack.
-    NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
-    PARAMS="$@"
+devstack() {
+  # Doc: Executes a command inside the docker devstack directory.
+  if ! ensure_docker; then
+    return 1
+  fi
 
-    if [[ -n "$PARAMS" ]]; then
-        docker exec -it edx.devstack.lms bash -c ". /edx/app/edxapp/nodeenvs/edxapp/bin/activate; . /edx/app/edxapp/venvs/edxapp/bin/activate; cd /edx/app/edxapp/edx-platform; NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
-    else
-        echo 'Missing params'
-    fi
+  local DEVSTACK_DIR=$(find_up devstack);
+  local PARAMS="$@"
+  bash -c "cd $DEVSTACK_DIR/devstack && pwd && $PARAMS"
+}
+
+docker_edxapp_exec() {
+  # Doc (Internal): Sets the environment and executes a command inside an edxapp devstack.
+  if ! ensure_docker; then
+    return 1
+  fi
+
+  local NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
+  local PARAMS="$@"
+
+  if [[ -n "$PARAMS" ]]; then
+      docker exec -it edx.devstack.lms bash -c ". /edx/app/edxapp/nodeenvs/edxapp/bin/activate; . /edx/app/edxapp/venvs/edxapp/bin/activate; cd /edx/app/edxapp/edx-platform; NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
+  else
+      echo 'Missing params'
+  fi
 }
 
 edxapp() {
