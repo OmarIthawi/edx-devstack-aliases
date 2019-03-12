@@ -97,7 +97,7 @@ docker_edxapp_exec() {
   local PARAMS="$@"
 
   if [[ -n "$PARAMS" ]]; then
-      docker exec -it edx.devstack.lms bash -c ". /edx/app/edxapp/nodeenvs/edxapp/bin/activate; . /edx/app/edxapp/venvs/edxapp/bin/activate; cd /edx/app/edxapp/edx-platform; NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
+      docker exec -it edx.devstack.lms bash -c "source /edx/app/edxapp/edxapp_env && cd /edx/app/edxapp/edx-platform/ && NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
   else
       echo 'Missing params'
   fi
