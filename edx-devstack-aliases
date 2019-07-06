@@ -1,7 +1,4 @@
 #!/bin/bash
-# Doc: `openedx` goes to the directory `~/work/openedx/edx-platform`
-alias openedx='cd ~/work/openedx/edx-platform && git status'
-
 quote () {
     # Doc (Internal): Quotes a bash argument.
     # Source: http://askubuntu.com/a/354923/110778
@@ -19,18 +16,6 @@ find_up() {
   echo "$path"
 }
 
-ensure_vagrant() {
-  # Doc (Internal): Ensures that we're running inside a Vagrant-based edX platform tree.
-  local VAGRANT_FILE_PATH=$(find_up Vagrantfile)
-
-  if [ -z "$VAGRANT_FILE_PATH" ]; then
-      echo "edX platform directory could not be detected" 1>&2
-      echo "Please go to the correct directory" 1>&2
-      echo "  e.g. 'cd ~/work/openedx/edx-platform'" 1>&2
-      return 1
-  fi
-}
-
 ensure_docker() {
   # Doc (Internal): Ensures that we're running inside a docker devstack tree.
   local DEVSTACK_PATH=$(find_up devstack)
@@ -43,41 +28,8 @@ ensure_docker() {
   fi
 }
 
-vagrant_ssh() {
-  # Doc (Internal): A bit faster and lower-level alternative to the `$ vagrant ssh`
-  if ! ensure_vagrant; then
-    return 1
-  fi
-
-  local CONFIG_FILE=`mktemp`
-
-  vagrant ssh-config > $CONFIG_FILE
-
-  ssh -F $CONFIG_FILE default $@
-
-  rm $CONFIG_FILE
-}
-
-vagrant_exec() {
-  # Doc (Internal): Sets the environment and executes a command inside vagrant.
-  if ! ensure_vagrant; then
-    return 1
-  fi
-
-  local NO_PREREQ_INSTALL=${NO_PREREQ_INSTALL:-true}
-  local PYTHONWARNINGS=${PYTHONWARNINGS:-default}
-  local VAGRANT_SUDO_USER=${VAGRANT_SUDO_USER:-'vagrant'}
-  local PARAMS=$@
-
-  if [[ -n "$PARAMS" ]]; then
-    vagrant_ssh -o User=$VAGRANT_SUDO_USER -- PYTHONUNBUFFERED=1 PYTHONWARNINGS=$PYTHONWARNINGS NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS
-  else
-    vagrant_ssh -o User=$VAGRANT_SUDO_USER
-  fi
-}
-
 devstack() {
-  # Doc: Executes a command inside the docker devstack directory.
+  # Doc: `devstack`: Executes a command inside the docker devstack directory.
   if ! ensure_docker; then
     return 1
   fi
@@ -97,35 +49,24 @@ docker_edxapp_exec() {
   local PARAMS="$@"
 
   if [[ -n "$PARAMS" ]]; then
-      docker exec -it edx.devstack.lms bash -c "source /edx/app/edxapp/edxapp_env && cd /edx/app/edxapp/edx-platform/ && NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
+      docker exec -it ${DEVSTACK_CONTAINER} bash -c "source /edx/app/edxapp/edxapp_env && cd /edx/app/edxapp/edx-platform/ && NO_PREREQ_INSTALL=$NO_PREREQ_INSTALL $PARAMS"
   else
       echo 'Missing params'
   fi
 }
 
-edxapp() {
-  # Doc: `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
-  if ensure_vagrant 2>/dev/null; then
-    VAGRANT_SUDO_USER='edxapp' vagrant_exec "$@"
-  else
-    docker_edxapp_exec "$@"
-  fi
+lms() {
+  # Doc: `lms`: Execute command as the `edxapp` user in the lms e.g `$ lms ls`
+  DEVSTACK_CONTAINER='edx.devstack.lms' docker_edxapp_exec "$@"
 }
 
-vagrant_init_ssh() {
-  # Doc: `vagrant_init_ssh`: Allow direct SSH via the edxapp user
-  vagrant ssh -- bash -c "'sudo sed -i s=edxapp:/bin/false=edxapp:/bin/bash= -- /etc/passwd'"
-
-  vagrant ssh -- bash -c "'sudo mkdir -p /edx/app/edxapp/.ssh'"
-  vagrant ssh -- bash -c "'sudo cat /home/vagrant/.ssh/authorized_keys | sudo tee /edx/app/edxapp/.ssh/authorized_keys'"
-  vagrant ssh -- bash -c "'sudo chown edxapp:edxapp -R /edx/app/edxapp/.ssh'"
-
-  vagrant ssh -- bash -c "'sudo mkdir -p /edx/src/edxapp-envs/'"
-  vagrant ssh -- bash -c "'test -f /edx/src/edxapp-envs/lms.env.json || sudo mv /edx/app/edxapp/{lms,cms}.{env,auth}.json /edx/src/edxapp-envs/' 2>/dev/null"
-  vagrant ssh -- bash -c "'test -f /edx/src/edxapp-envs/lms.env.json && sudo ln -s /edx/src/edxapp-envs/{lms,cms}.{env,auth}.json /edx/app/edxapp/'"
-  vagrant ssh -- bash -c "'sudo chown edxapp:edxapp -R /edx/src/edxapp-envs 2>/dev/null'"
-  vagrant ssh -- bash -c "'sudo chown edxapp:edxapp /edx/src/edxapp-envs/{lms,cms}.{env,auth}.json'"
+studio() {
+  # Doc: `studio`: Execute command as the `edxapp` user in the studio e.g `$ studio ls`
+  DEVSTACK_CONTAINER='edx.devstack.studio' docker_edxapp_exec "$@"
 }
+
+# Doc (Internal): `edxapp`: Legacy version of `lms`
+alias edxapp='lms'
 
 # Doc: `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
 alias test_bokchoy_one='edxapp paver test_bokchoy --testsonly --fasttest -t'

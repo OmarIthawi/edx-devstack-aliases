@@ -7,14 +7,11 @@ The aliases are highly opinionated. If you don't like
 something you're welcome to submit pull requests and/or fork it!
 
 ## Commands
-- `openedx` goes to the directory `~/work/openedx/edx-platform`
-- `edxapp`: Execute command as the `edxapp` user e.g `$ edxapp ls`
-- `vagrant_init_ssh`: Allow direct SSH via the edxapp user
-- `paver`: Executes a paver command as the `edxapp` user e.g `$ paver --help`
-- `manage.py`: Executes a manage.py command as the `edxapp` user e.g `$ manage.py --help`
-- `pylint`: Executes pylint
+- `devstack`: Executes a command inside the docker devstack directory.
+- `lms`: Execute command as the `edxapp` user in the lms e.g `$ lms ls`
+- `studio`: Execute command as the `edxapp` user in the studio e.g `$ studio ls`
 - `test_bokchoy_one`: Tests a single bokchoy test case (requires the --serveronly to be running)
-- `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one lms/djangoapps/appsembler_api/tests/test_views.py`
+- `test_system_one`: Tests a single lms/cms unit and integration test case  e.g. `$ test_system_one lms/djangoapps/appsembler_api/tests/test_views.py
 - `test_cov_system_one`: Like `test_system_one`, with coverage report, and usually slower.
 
 
@@ -37,16 +34,7 @@ source ~/edx-devstack-aliases/edx-devstack-aliases
 
 Close your terminal and open it again!
 
-This repo requires allowing SSH as `edxapp`. To enable that
-SSH into vagrant and run the commands below.
-
-```
-$ vagrant_init_ssh
-```
-
 # Known Limitations
- - [ ] It's currently not possible to do `$ edxapp vi file.txt`, you'd get
-       a garbled screen!
  - [ ] Exiting long running commands like `$ paver lms` doesn't work, so
        it keeps running in the background.
 
