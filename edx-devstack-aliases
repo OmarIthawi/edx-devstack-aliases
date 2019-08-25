@@ -65,6 +65,13 @@ studio() {
   DEVSTACK_CONTAINER='edx.devstack.studio' docker_edxapp_exec "$@"
 }
 
+xblock-pipi() {
+    lms pip install "$@" && \
+        studio pip install "$@" && \
+        devstack make studio-restart && \
+        devstack make lms-restart
+}
+
 # Doc (Internal): `edxapp`: Legacy version of `lms`
 alias edxapp='lms'
 
