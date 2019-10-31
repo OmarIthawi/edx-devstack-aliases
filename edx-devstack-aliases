@@ -65,7 +65,7 @@ studio() {
   DEVSTACK_CONTAINER='edx.devstack.studio' docker_edxapp_exec "$@"
 }
 
-xblock-pipi() {
+edxapp-pipi() {
     lms pip install "$@" && \
         studio pip install "$@" && \
         devstack make studio-restart && \
